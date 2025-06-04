@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon World</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="page-container">
+        <div id="left-panel">
+            <h2>Pokémon Của Bạn</h2>
+            <div id="player-pokemon-info">
+                <p><strong>Tên:</strong> <span id="pkm-name">-</span></p>
+                <p><strong>Loại:</strong> <span id="pkm-type">-</span></p>
+                <p><strong>Máu (HP):</strong> <span id="pkm-hp">-</span></p>
+                <p><strong>Sát thương (DMG):</strong> <span id="pkm-dmg">-</span></p>
+                <img id="pkm-image" src="" alt="Hình ảnh Pokémon" style="width:96px; height:96px; margin-top:10px; border:1px solid #eee; display:none;">
+            </div>
+            <hr style="margin: 15px 0;">
+            <div id="trainer-info">
+                 <p><strong>Huấn Luyện Viên:</strong> <span id="trainer-name-display">-</span></p>
+            </div>
+        </div>
+
+        <div id="center-panel">
+            <div id="game-container">
+                <div id="map-grid">
+                    </div>
+                <div id="player"></div>
+                </div>
+
+            <div id="ui-info"> <p>Map Hiện Tại: <span id="current-map-display">N/A</span></p>
+                <p>Tọa Độ: <span id="player-coords">(-,-)</span></p>
+                <p>Thông Báo: <span id="game-message">Chào mừng đến với thế giới Pokémon!</span></p>
+            </div>
+
+            <div id="map-controls" style="margin-top: 15px; text-align:center;">
+                <button onclick="game.loadMapByName('map1')">Map 1</button>
+                <button onclick="game.loadMapByName('map2')">Map 2</button>
+                <button onclick="game.loadMapByName('map3')">Map 3</button>
+                <button onclick="game.loadMapByName('map4')">Map 4</button>
+                <br>
+                <button onclick="window.location.href='player_profile.php'" style="margin-top: 10px;">Về Trang Profile</button>
+            </div>
+        </div>
+
+        <div id="right-panel">
+            <h2>Hướng Dẫn Chơi</h2>
+            <div id="manual-text">
+                <p><strong>Di Chuyển:</strong></p>
+                <ul>
+                    <li>Sử dụng các phím mũi tên (↑, ↓, ←, →) trên bàn phím.</li>
+                    <li>Hoặc dùng các phím W (lên), A (trái), S (xuống), D (phải).</li>
+                </ul>
+                <p><strong>Mục Tiêu:</strong></p>
+                <ul>
+                    <li>Khám phá các bản đồ.</li>
+                    <li>Di chuyển vào các ô cỏ để có cơ hội gặp Pokémon hoang dã và chiến đấu.</li>
+                    <li>Tìm và đánh bại các Boss hùng mạnh ở cuối mỗi map đặc biệt.</li>
+                </ul>
+                <p><strong>Lưu Ý:</strong></p>
+                <ul>
+                    <li>Sau mỗi trận thắng, Pokémon của bạn sẽ được hồi đầy máu và tăng chỉ số (lên cấp).</li>
+                    <li>Bạn có thể Lưu game hoặc "Chơi Mới Hoàn Toàn" từ Trang Profile.</li>
+                </ul>
+                <p><strong>Tổng Hợp Các Thực Thể:</strong></p>
+                <ul>
+                    <li>Map2_Charizard: Là dạng tiến hóa của charmander, ngầu lòi hơn, khỏe hơn</li>
+                    <li>Map3_Tralala: Là 1 con cá mập đi 3 chân đi giày nike với chỉ số cao vút trời, có thể đấm được tất cả mấy con gà nào dám thách thức nó</li>
+                    <li>Map4_sigmaPika: Là Pikachu tập gym quá 180p nhưng không skip leg day, hiệu ứng đặc biệt làm giảm chỉ số của Trainer xuống thấp và đấm luôn đối thủ</li>
+                    <li>Pokemon: Là con Pokemon bạn chọn ở đầu game, mỗi Pokemon đều có sức mạnh riêng (chắc thế)</li>
+                    <li>Trainer: Là nhân vật chính bạn đang điều khiển, sức mạnh của bạn phụ thuộc vào số lượng pokemon bạn đã đánh bại, kiên trì = vô địch</li>
+                    <li>godMode: Là 1 dạng nâng cấp của Trainer, bất tử, không thể thua, luôn luôn thắng, cân mọi kèo</li>
+                </ul>
+                <p><strong>Hint Để Clear Map:</strong></p>
+                <ul>
+                    <li>Bạn có thể ngồi cày full chỉ số cho pokemon (nếu bạn đủ kiên trì), còn không thì hack game</li>
+                    <li>Hãy khám phá các chức năng của game, từ đó tìm ra lỗ hổng để hack, clear game</li>
+                </ul>
+                
+                <p style="margin-top:15px;">
+                    <a href="player_profile.php" class="profile-link-button">Về Trang Profile</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <audio id="background-music" loop></audio>
+    <audio id="sfx-sound"></audio>
+
+    <script src="js/game.js"></script>
+</body>
+</html>

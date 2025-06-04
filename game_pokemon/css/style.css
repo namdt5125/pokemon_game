@@ -1,0 +1,171 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font dễ đọc hơn */
+    margin: 0;
+    padding: 15px; /* Tăng padding cho body */
+    background-color: #f0f2f5; /* Màu nền nhẹ nhàng cho toàn trang */
+    display: flex;
+    justify-content: center;
+    color: #333;
+}
+
+#page-container {
+    display: flex;
+    flex-direction: row;
+    max-width: 1600px; /* Tăng max-width để có không gian cho 3 cột */
+    width: 100%;
+    gap: 20px; /* Khoảng cách rõ ràng hơn giữa các panel */
+}
+
+#left-panel, #center-panel, #right-panel {
+    background-color: #ffffff;
+    padding: 20px;
+    border: 1px solid #d1d1d1;
+    border-radius: 10px; /* Bo góc nhiều hơn */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Box shadow nhẹ nhàng */
+}
+
+#left-panel {
+    width: 280px; 
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column; /* Sắp xếp các phần tử con theo chiều dọc */
+}
+
+#center-panel {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#right-panel {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+#left-panel h2, #right-panel h2, #center-panel h2 /* Style chung cho tiêu đề panel */ {
+    margin-top: 0;
+    color: #0056b3; /* Màu xanh đậm hơn */
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+#player-pokemon-info p, #trainer-info p {
+    margin: 10px 0;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+#player-pokemon-info strong, #trainer-info strong {
+    color: #111; /* Màu chữ đậm hơn cho nhãn */
+    min-width: 80px; /* Đảm bảo các nhãn thẳng hàng */
+    display: inline-block;
+}
+#pkm-image {
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    background-color: #f0f8ff; /* Nền nhẹ cho ảnh */
+}
+
+
+#game-container {
+    position: relative; 
+    border: 3px solid #4A5568; /* Viền đậm hơn, màu xám */
+    overflow: hidden; 
+    margin-bottom: 15px; 
+    background-color: #718096; /* Màu nền cho khu vực map nếu map nhỏ hơn container */
+    border-radius: 5px; /* Bo góc nhẹ cho game container */
+}
+
+#map-grid {
+    display: grid;
+    /* border: 1px dashed #a0aec0; */ /* Viền lưới mờ hơn */
+}
+
+.tile {
+    width: 65px;  /* Kích thước mỗi ô - Đồng bộ với game.tileSize */
+    height: 65px; /* Đồng bộ với game.tileSize */
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* Thêm hiệu ứng khi hover lên tile nếu muốn */
+    /* transition: transform 0.1s ease-in-out; */
+}
+/* .tile:hover {
+    transform: scale(1.1);
+    z-index: 1;
+} */
+
+
+#player {
+    position: absolute; 
+    width: 65px; /* Đồng bộ với game.tileSize */
+    height: 65px; /* Đồng bộ với game.tileSize */
+    background-image: url('../assets/images/player/haha.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: top 0.08s linear, left 0.08s linear; /* Di chuyển nhanh hơn chút */
+    z-index: 10;
+    image-rendering: pixelated; /* Giữ độ nét cho ảnh pixel art */
+}
+
+.boss-sprite {
+    position: absolute;
+    width: 100px; /* Đồng bộ với game.tileSize */
+    height: 100px; /* Đồng bộ với game.tileSize */
+    background-size: contain; /* Hoặc cover tùy kích thước ảnh boss */
+    background-repeat: no-repeat;
+    z-index: 5; 
+    image-rendering: pixelated;
+}
+
+#ui-info {
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    text-align: center; 
+    width: 100%; 
+    box-sizing: border-box; 
+    background-color: #f7fafc; /* Nền sáng hơn cho UI info */
+    margin-bottom: 15px;
+}
+#ui-info p {
+    margin: 8px 0;
+    font-size: 0.9em;
+}
+#ui-info span {
+    font-weight: bold;
+    color: #2c5282; /* Màu chữ cho giá trị */
+}
+
+
+#map-controls button, .profile-link-button {
+    background-color: #4A5568; /* Màu xám đậm */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin: 5px 3px;
+    transition: background-color 0.2s;
+}
+#map-controls button:hover, .profile-link-button:hover {
+    background-color: #2D3748; /* Xám đậm hơn khi hover */
+}
+.profile-link-button { /* Style cho link giống button */
+    text-decoration: none;
+    display: inline-block;
+}
+
+#manual-text ul {
+    padding-left: 20px;
+    list-style-type: "👉 "; /* Emoji làm bullet point */
+}
+#manual-text li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+#manual-text strong {
+    color: #0056b3;
+}
