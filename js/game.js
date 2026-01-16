@@ -1,7 +1,7 @@
 // File: js/game.js
 
 const game = {
-    tileSize: 65, 
+    tileSize: 65,
     player: {
         x: 0,
         y: 0,
@@ -9,7 +9,7 @@ const game = {
         facing: 'down',
         sprites: {
             down: 'haha.png',
-            up: 'haha.png', 
+            up: 'haha.png',
             left: 'moving_user.png',
             right: 'moving_user.png'
         }
@@ -41,18 +41,18 @@ const game = {
         console.log("Game init started...");
         this.mapGridDom = document.getElementById('map-grid');
         this.player.domElement = document.getElementById('player');
-        
+
         this.ui.mapDisplay = document.getElementById('current-map-display');
         this.ui.playerCoords = document.getElementById('player-coords');
         this.ui.gameMessage = document.getElementById('game-message');
-        
+
         this.ui.pkmName = document.getElementById('pkm-name');
         this.ui.pkmType = document.getElementById('pkm-type');
         this.ui.pkmHp = document.getElementById('pkm-hp');
         this.ui.pkmDmg = document.getElementById('pkm-dmg');
         this.ui.pkmImage = document.getElementById('pkm-image');
         this.ui.trainerNameDisplay = document.getElementById('trainer-name-display');
-        
+
         this.audio.backgroundMusic = document.getElementById('background-music');
         this.audio.sfx = document.getElementById('sfx-sound');
 
@@ -64,24 +64,37 @@ const game = {
             // currentMapName nên được lấy từ session PHP khi tải lại thông tin trainer
             // Hoặc nếu battle.js lưu map hiện tại vào sessionStorage
             const storedMap = sessionStorage.getItem('mapBeforeBattle');
-            this.currentMapName = storedMap || this.currentMapName; 
-            if(storedMap) sessionStorage.removeItem('mapBeforeBattle');
+            this.currentMapName = storedMap || this.currentMapName;
+            if (storedMap) sessionStorage.removeItem('mapBeforeBattle');
 
             await this.fetchAndUpdatePlayerPokemonInfo(); // Tải lại thông tin mới nhất
-            if (this.ui.trainerNameDisplay && this.ui.trainerNameDisplay.textContent !== '-' && 
+            if (this.ui.trainerNameDisplay && this.ui.trainerNameDisplay.textContent !== '-' &&
                 this.ui.trainerNameDisplay.textContent !== 'Lỗi tải' &&
                 !this.ui.trainerNameDisplay.textContent.includes("Không tìm thấy")) {
-                 await this.loadMapByName(this.currentMapName);
-                 this.setGameMessage("Chào mừng trở lại bản đồ!");
+                await this.loadMapByName(this.currentMapName);
+
+                // Restore coordinates if available
+                const savedX = sessionStorage.getItem('battleReturnX');
+                const savedY = sessionStorage.getItem('battleReturnY');
+                if (savedX !== null && savedY !== null) {
+                    this.player.x = parseInt(savedX);
+                    this.player.y = parseInt(savedY);
+                    this.updatePlayerPosition();
+                    console.log(`Restored player coordinates to (${this.player.x}, ${this.player.y})`);
+                    sessionStorage.removeItem('battleReturnX');
+                    sessionStorage.removeItem('battleReturnY');
+                }
+
+                this.setGameMessage("Chào mừng trở lại bản đồ!");
             } else {
                 this.setGameMessage("Lỗi tải thông tin người chơi sau trận đấu. Vui lòng thử đăng nhập lại.");
                 console.error("Player info not loaded post-battle, map loading aborted.");
             }
         } else {
             // Khởi tạo bình thường nếu không phải quay lại từ trận đấu
-            const playerInfoLoaded = await this.fetchAndUpdatePlayerPokemonInfo(); 
+            const playerInfoLoaded = await this.fetchAndUpdatePlayerPokemonInfo();
             if (playerInfoLoaded) {
-                 await this.loadMapByName(this.currentMapName);
+                await this.loadMapByName(this.currentMapName);
             } else {
                 this.setGameMessage("Không thể tải thông tin người chơi. Vui lòng thử đăng nhập lại hoặc 'Chơi Mới Hoàn Toàn' từ trang Profile.");
                 console.error("Player info not loaded or invalid during initial init, map loading aborted.");
@@ -89,7 +102,7 @@ const game = {
         }
 
         document.addEventListener('keydown', (event) => this.handleKeyPress(event));
-        this.updateUIDisplay(); 
+        this.updateUIDisplay();
         this.playBackgroundMusic(); // Sẽ phát nếu this.inBattle là false
     },
 
@@ -112,13 +125,13 @@ const game = {
                 const trainer = result.trainer;
                 const pkm = trainer.pokemon;
 
-                if(this.ui.trainerNameDisplay) this.ui.trainerNameDisplay.textContent = trainer.name || "N/A";
+                if (this.ui.trainerNameDisplay) this.ui.trainerNameDisplay.textContent = trainer.name || "N/A";
 
                 if (pkm && typeof pkm === 'object') {
-                    if(this.ui.pkmName) this.ui.pkmName.textContent = pkm.name || "-";
-                    if(this.ui.pkmType) this.ui.pkmType.textContent = pkm.type || "-";
-                    if(this.ui.pkmHp) this.ui.pkmHp.textContent = (pkm.health !== undefined && pkm.health !== null) ? pkm.health : "-";
-                    if(this.ui.pkmDmg) this.ui.pkmDmg.textContent = (pkm.damage !== undefined && pkm.damage !== null) ? pkm.damage : "-";
+                    if (this.ui.pkmName) this.ui.pkmName.textContent = pkm.name || "-";
+                    if (this.ui.pkmType) this.ui.pkmType.textContent = pkm.type || "-";
+                    if (this.ui.pkmHp) this.ui.pkmHp.textContent = (pkm.health !== undefined && pkm.health !== null) ? pkm.health : "-";
+                    if (this.ui.pkmDmg) this.ui.pkmDmg.textContent = (pkm.damage !== undefined && pkm.damage !== null) ? pkm.damage : "-";
 
                     if (this.ui.pkmImage && pkm.type) {
                         const imageName = String(pkm.type).toLowerCase() + '.png';
@@ -152,37 +165,37 @@ const game = {
 
     clearPlayerPokemonInfoUI(reason = "-") {
         const displayReason = (reason === "-" || reason === "N/A" || reason === "Không tìm thấy thông tin Trainer hợp lệ trong session.") ? "-" : reason;
-        if(this.ui.trainerNameDisplay) this.ui.trainerNameDisplay.textContent = displayReason;
-        if(this.ui.pkmName) this.ui.pkmName.textContent = "-";
-        if(this.ui.pkmType) this.ui.pkmType.textContent = "-";
-        if(this.ui.pkmHp) this.ui.pkmHp.textContent = "-";
-        if(this.ui.pkmDmg) this.ui.pkmDmg.textContent = "-";
-        if(this.ui.pkmImage) {
+        if (this.ui.trainerNameDisplay) this.ui.trainerNameDisplay.textContent = displayReason;
+        if (this.ui.pkmName) this.ui.pkmName.textContent = "-";
+        if (this.ui.pkmType) this.ui.pkmType.textContent = "-";
+        if (this.ui.pkmHp) this.ui.pkmHp.textContent = "-";
+        if (this.ui.pkmDmg) this.ui.pkmDmg.textContent = "-";
+        if (this.ui.pkmImage) {
             this.ui.pkmImage.src = "";
             this.ui.pkmImage.alt = "Chưa có ảnh";
             this.ui.pkmImage.style.display = 'none';
         }
     },
-    
+
     async loadMapByName(mapName) {
         if (this.inBattle) { this.setGameMessage("Không thể chuyển map khi đang trong trận đấu!"); return; }
-        
+
         try {
             const formData = new FormData();
-            formData.append('action', 'update_current_map'); 
+            formData.append('action', 'update_current_map');
             formData.append('map_name', mapName);
-            const mapUpdateResponse = await fetch('php_api/game_actions.php', { method: 'POST', body: formData }); 
-            if(mapUpdateResponse.ok){
+            const mapUpdateResponse = await fetch('php_api/game_actions.php', { method: 'POST', body: formData });
+            if (mapUpdateResponse.ok) {
                 const mapUpdateResult = await mapUpdateResponse.json(); // Luôn parse JSON để kiểm tra success
-                if(mapUpdateResult.success) {
+                if (mapUpdateResult.success) {
                     console.log(`Server updated current_map to ${mapName}`);
-                     // Cập nhật currentMapName trên client SAU KHI server xác nhận
+                    // Cập nhật currentMapName trên client SAU KHI server xác nhận
                     this.currentMapName = mapName;
                 } else {
                     console.warn(`Server failed to update current_map: ${mapUpdateResult.message}`);
                     // Không nên thay đổi this.currentMapName nếu server không cập nhật được
                 }
-            } else { 
+            } else {
                 const errorText = await mapUpdateResponse.text();
                 console.error(`HTTP error updating current_map! Status: ${mapUpdateResponse.status}. Server response: ${errorText}`);
             }
@@ -202,70 +215,72 @@ const game = {
                     this.player.x = this.currentMapData.start_pos.x;
                     this.player.y = this.currentMapData.start_pos.y;
                 } else { this.player.x = 0; this.player.y = 0; console.warn(`Map ${mapName} is missing start_pos.`); }
-                
+
                 this.renderMap();
-                this.updatePlayerPosition(); 
-                this.updateUIDisplay();    
+                this.updatePlayerPosition();
+                this.updateUIDisplay();
                 this.setGameMessage(`Chào mừng tới ${this.currentMapData.name}`);
                 this.playBackgroundMusic();
                 console.log(`${mapName} loaded. Player at: (${this.player.x}, ${this.player.y})`);
             } else { console.error("Failed to load map data:", data.message); this.setGameMessage(`Lỗi tải map: ${data.message}`); }
         } catch (error) { console.error("Error fetching map data:", error); this.setGameMessage("Lỗi kết nối tới server để tải map."); }
     },
-    
+
     getTileProperty(tileId, propertyName) { if (this.tileProperties && this.tileProperties[tileId]) { return this.tileProperties[tileId][propertyName]; } return undefined; },
-    
-    renderMap() { 
-        if (!this.currentMapData || !this.mapGridDom || !this.tileProperties) { console.error("Map data for rendering not available."); return; } 
-        this.mapGridDom.innerHTML = ''; this.clearBossSprites(); 
-        const layout = this.currentMapData.layout; 
-        if (!layout || layout.length === 0 || !Array.isArray(layout[0])) { console.error("Map layout invalid."); return; } 
-        const numRows = layout.length; const numCols = layout[0].length; 
-        this.mapGridDom.style.gridTemplateColumns = `repeat(${numCols}, ${this.tileSize}px)`; 
-        this.mapGridDom.style.gridTemplateRows = `repeat(${numRows}, ${this.tileSize}px)`; 
-        const gameContainer = document.getElementById('game-container'); 
-        gameContainer.style.width = `${numCols * this.tileSize}px`; 
-        gameContainer.style.height = `${numRows * this.tileSize}px`; 
-        for (let r = 0; r < numRows; r++) { for (let c = 0; c < numCols; c++) { 
-            const tileId = layout[r][c]; const tileDiv = document.createElement('div'); 
-            tileDiv.classList.add('tile'); 
-            const tileImagePath = this.getTileProperty(tileId, 'image'); 
-            if (tileImagePath) { tileDiv.style.backgroundImage = `url('${this.assetsBaseUrl}tiles/${tileImagePath}')`; } 
-            else { tileDiv.textContent = tileId; tileDiv.style.backgroundColor = '#ccc'; } 
-            this.mapGridDom.appendChild(tileDiv); 
-            if (this.getTileProperty(tileId, 'is_boss')) { 
-                const bossSpriteName = this.getTileProperty(tileId, 'boss_sprite'); 
-                if (bossSpriteName) { 
-                    const bossDiv = document.createElement('div'); 
-                    bossDiv.classList.add('boss-sprite'); 
-                    bossDiv.style.backgroundImage = `url('${this.assetsBaseUrl}bosses/${bossSpriteName}')`; 
-                    bossDiv.style.left = `${c * this.tileSize}px`; 
-                    bossDiv.style.top = `${r * this.tileSize}px`; 
-                    document.getElementById('game-container').appendChild(bossDiv); 
-                    this.bossSpritesOnMap.push(bossDiv); 
-                } 
-            } 
-        } } 
+
+    renderMap() {
+        if (!this.currentMapData || !this.mapGridDom || !this.tileProperties) { console.error("Map data for rendering not available."); return; }
+        this.mapGridDom.innerHTML = ''; this.clearBossSprites();
+        const layout = this.currentMapData.layout;
+        if (!layout || layout.length === 0 || !Array.isArray(layout[0])) { console.error("Map layout invalid."); return; }
+        const numRows = layout.length; const numCols = layout[0].length;
+        this.mapGridDom.style.gridTemplateColumns = `repeat(${numCols}, ${this.tileSize}px)`;
+        this.mapGridDom.style.gridTemplateRows = `repeat(${numRows}, ${this.tileSize}px)`;
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.style.width = `${numCols * this.tileSize}px`;
+        gameContainer.style.height = `${numRows * this.tileSize}px`;
+        for (let r = 0; r < numRows; r++) {
+            for (let c = 0; c < numCols; c++) {
+                const tileId = layout[r][c]; const tileDiv = document.createElement('div');
+                tileDiv.classList.add('tile');
+                const tileImagePath = this.getTileProperty(tileId, 'image');
+                if (tileImagePath) { tileDiv.style.backgroundImage = `url('${this.assetsBaseUrl}tiles/${tileImagePath}')`; }
+                else { tileDiv.textContent = tileId; tileDiv.style.backgroundColor = '#ccc'; }
+                this.mapGridDom.appendChild(tileDiv);
+                if (this.getTileProperty(tileId, 'is_boss')) {
+                    const bossSpriteName = this.getTileProperty(tileId, 'boss_sprite');
+                    if (bossSpriteName) {
+                        const bossDiv = document.createElement('div');
+                        bossDiv.classList.add('boss-sprite');
+                        bossDiv.style.backgroundImage = `url('${this.assetsBaseUrl}bosses/${bossSpriteName}')`;
+                        bossDiv.style.left = `${c * this.tileSize}px`;
+                        bossDiv.style.top = `${r * this.tileSize}px`;
+                        document.getElementById('game-container').appendChild(bossDiv);
+                        this.bossSpritesOnMap.push(bossDiv);
+                    }
+                }
+            }
+        }
     },
 
     clearBossSprites() { this.bossSpritesOnMap.forEach(sprite => sprite.remove()); this.bossSpritesOnMap = []; },
 
-    updatePlayerPosition() { 
-        if (!this.player.domElement) return; 
-        this.player.domElement.style.left = `${this.player.x * this.tileSize}px`; 
-        this.player.domElement.style.top = `${this.player.y * this.tileSize}px`; 
-        const playerSpriteFile = this.player.sprites[this.player.facing] || this.player.sprites.down; 
-        this.player.domElement.style.backgroundImage = `url('${this.assetsBaseUrl}player/${playerSpriteFile}')`; 
-        if (this.player.facing === 'right' && playerSpriteFile === this.player.sprites.left) { this.player.domElement.style.transform = 'scaleX(-1)'; } 
-        else { this.player.domElement.style.transform = 'scaleX(1)'; } 
-        this.updateUIDisplay(); 
+    updatePlayerPosition() {
+        if (!this.player.domElement) return;
+        this.player.domElement.style.left = `${this.player.x * this.tileSize}px`;
+        this.player.domElement.style.top = `${this.player.y * this.tileSize}px`;
+        const playerSpriteFile = this.player.sprites[this.player.facing] || this.player.sprites.down;
+        this.player.domElement.style.backgroundImage = `url('${this.assetsBaseUrl}player/${playerSpriteFile}')`;
+        if (this.player.facing === 'right' && playerSpriteFile === this.player.sprites.left) { this.player.domElement.style.transform = 'scaleX(-1)'; }
+        else { this.player.domElement.style.transform = 'scaleX(1)'; }
+        this.updateUIDisplay();
     },
 
-    updateUIDisplay() { 
-        if (this.ui.mapDisplay && this.currentMapData) this.ui.mapDisplay.textContent = this.currentMapData.name; 
-        if (this.ui.playerCoords) this.ui.playerCoords.textContent = `(${this.player.x}, ${this.player.y})`; 
+    updateUIDisplay() {
+        if (this.ui.mapDisplay && this.currentMapData) this.ui.mapDisplay.textContent = this.currentMapData.name;
+        if (this.ui.playerCoords) this.ui.playerCoords.textContent = `(${this.player.x}, ${this.player.y})`;
     },
-    
+
     setGameMessage(message) { if (this.ui.gameMessage) this.ui.gameMessage.textContent = message; console.log("Game Message:", message); },
 
     playBackgroundMusic() {
@@ -275,71 +290,71 @@ const game = {
             }
             return;
         }
-        if (this.currentMapData && this.currentMapData.music && this.audio.backgroundMusic) { 
-            try { 
-                const musicUrl = new URL(this.currentMapData.music, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)).href; 
-                if (this.audio.backgroundMusic.src !== musicUrl) { this.audio.backgroundMusic.src = musicUrl; } 
+        if (this.currentMapData && this.currentMapData.music && this.audio.backgroundMusic) {
+            try {
+                const musicUrl = new URL(this.currentMapData.music, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)).href;
+                if (this.audio.backgroundMusic.src !== musicUrl) { this.audio.backgroundMusic.src = musicUrl; }
                 if (this.audio.backgroundMusic.paused) { // Chỉ play nếu đang paused
-                    this.audio.backgroundMusic.play().catch(e => console.warn("Autoplay prevented for background music:", e.message)); 
+                    this.audio.backgroundMusic.play().catch(e => console.warn("Autoplay prevented for background music:", e.message));
                 }
-            } catch(e) { console.error("Error setting/playing background music URL:", e); } 
-        } 
+            } catch (e) { console.error("Error setting/playing background music URL:", e); }
+        }
     },
 
-    playSoundEffect(soundFile) { 
-        if (this.audio.sfx) { 
-            try { 
-                const sfxUrl = new URL(soundFile, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)).href; 
-                this.audio.sfx.src = sfxUrl; 
-                this.audio.sfx.play().catch(e => console.warn("Autoplay prevented for SFX:", e.message)); 
-            } catch(e) { console.error("Error setting/playing SFX URL:", e); } 
-        } 
+    playSoundEffect(soundFile) {
+        if (this.audio.sfx) {
+            try {
+                const sfxUrl = new URL(soundFile, window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1)).href;
+                this.audio.sfx.src = sfxUrl;
+                this.audio.sfx.play().catch(e => console.warn("Autoplay prevented for SFX:", e.message));
+            } catch (e) { console.error("Error setting/playing SFX URL:", e); }
+        }
     },
 
-    handleKeyPress(event) { 
-        if (this.inBattle) { this.setGameMessage("Đang trong trận đấu, không thể di chuyển!"); return; } 
-        let newX = this.player.x; let newY = this.player.y; let newFacing = this.player.facing; 
-        switch (event.key.toLowerCase()) { 
-            case 'arrowup': case 'w': newY--; newFacing = 'up'; break; 
-            case 'arrowdown': case 's': newY++; newFacing = 'down'; break; 
-            case 'arrowleft': case 'a': newX--; newFacing = 'left'; break; 
-            case 'arrowright': case 'd': newX++; newFacing = 'right'; break; 
-            default: return; 
-        } 
-        event.preventDefault(); this.player.facing = newFacing; 
-        if (this.isValidMove(newX, newY)) { 
-            this.player.x = newX; this.player.y = newY; 
-            this.updatePlayerPosition(); 
-            this.checkCurrentTileAction(); 
-        } else { this.updatePlayerPosition(); this.setGameMessage("Không thể đi hướng đó!"); } 
+    handleKeyPress(event) {
+        if (this.inBattle) { this.setGameMessage("Đang trong trận đấu, không thể di chuyển!"); return; }
+        let newX = this.player.x; let newY = this.player.y; let newFacing = this.player.facing;
+        switch (event.key.toLowerCase()) {
+            case 'arrowup': case 'w': newY--; newFacing = 'up'; break;
+            case 'arrowdown': case 's': newY++; newFacing = 'down'; break;
+            case 'arrowleft': case 'a': newX--; newFacing = 'left'; break;
+            case 'arrowright': case 'd': newX++; newFacing = 'right'; break;
+            default: return;
+        }
+        event.preventDefault(); this.player.facing = newFacing;
+        if (this.isValidMove(newX, newY)) {
+            this.player.x = newX; this.player.y = newY;
+            this.updatePlayerPosition();
+            this.checkCurrentTileAction();
+        } else { this.updatePlayerPosition(); this.setGameMessage("Không thể đi hướng đó!"); }
     },
 
-    isValidMove(x, y) { /* ... giữ nguyên ... */ 
-        if (!this.currentMapData || !this.currentMapData.layout) return false; 
-        const layout = this.currentMapData.layout; 
-        if (y < 0 || y >= layout.length || x < 0 || x >= layout[0].length) return false; 
-        const tileId = layout[y][x]; 
-        return this.getTileProperty(tileId, 'walkable'); 
+    isValidMove(x, y) { /* ... giữ nguyên ... */
+        if (!this.currentMapData || !this.currentMapData.layout) return false;
+        const layout = this.currentMapData.layout;
+        if (y < 0 || y >= layout.length || x < 0 || x >= layout[0].length) return false;
+        const tileId = layout[y][x];
+        return this.getTileProperty(tileId, 'walkable');
     },
 
-    checkCurrentTileAction() { /* ... giữ nguyên ... */ 
-        if (!this.currentMapData || !this.currentMapData.layout) return; 
-        const tileId = this.currentMapData.layout[this.player.y][this.player.x]; 
-        if (this.getTileProperty(tileId, 'is_boss')) { 
-            const bossId = this.getTileProperty(tileId, 'boss_id'); 
-            this.setGameMessage(`Chạm trán boss ${bossId}!`); 
-            this.playSoundEffect('../assets/audio/encounter_sfx.mp3'); 
-            this.initiateBattle('trigger_boss_battle', { boss_id: bossId }); 
-            return; 
-        } 
-        const encounterChance = this.getTileProperty(tileId, 'encounter_chance'); 
-        if (encounterChance > 0) { 
-            if (Math.random() * 100 < encounterChance) { 
-                this.setGameMessage("Gặp Pokemon hoang dã!"); 
-                this.playSoundEffect('../assets/audio/encounter_sfx.mp3'); 
-                this.initiateBattle('trigger_wild_encounter'); 
-            } 
-        } 
+    checkCurrentTileAction() { /* ... giữ nguyên ... */
+        if (!this.currentMapData || !this.currentMapData.layout) return;
+        const tileId = this.currentMapData.layout[this.player.y][this.player.x];
+        if (this.getTileProperty(tileId, 'is_boss')) {
+            const bossId = this.getTileProperty(tileId, 'boss_id');
+            this.setGameMessage(`Chạm trán boss ${bossId}!`);
+            this.playSoundEffect('../assets/audio/encounter_sfx.mp3');
+            this.initiateBattle('trigger_boss_battle', { boss_id: bossId });
+            return;
+        }
+        const encounterChance = this.getTileProperty(tileId, 'encounter_chance');
+        if (encounterChance > 0) {
+            if (Math.random() * 100 < encounterChance) {
+                this.setGameMessage("Gặp Pokemon hoang dã!");
+                this.playSoundEffect('../assets/audio/encounter_sfx.mp3');
+                this.initiateBattle('trigger_wild_encounter');
+            }
+        }
     },
 
     async initiateBattle(apiAction, params = {}) {
@@ -347,7 +362,7 @@ const game = {
             console.warn("Already attempting to initiate battle or in battle.");
             return;
         }
-        
+
         this.setGameMessage("Đang chuẩn bị trận đấu...");
         // Không set this.inBattle = true; ở đây ngay lập tức
         // Chỉ set sau khi server xác nhận và trước khi chuyển hướng
@@ -361,8 +376,8 @@ const game = {
         try {
             const response = await fetch('php_api/game_actions.php', { method: 'POST', body: formData });
             if (!response.ok) {
-                 const errorText = await response.text();
-                 throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, response: ${errorText}`);
             }
             const result = await response.json();
 
@@ -372,16 +387,21 @@ const game = {
                 // Không cần thiết phải lưu vào sessionStorage của client nữa nếu battle_ui.js sẽ fetch lại.
                 // Tuy nhiên, nếu muốn truyền trực tiếp thì sessionStorage là một cách.
                 // sessionStorage.setItem('currentBattleData', JSON.stringify(result)); 
-                
-                this.inBattle = true; 
-                if(this.audio.backgroundMusic && !this.audio.backgroundMusic.paused) {
-                    this.audio.backgroundMusic.pause(); 
+
+                this.inBattle = true;
+                if (this.audio.backgroundMusic && !this.audio.backgroundMusic.paused) {
+                    this.audio.backgroundMusic.pause();
                 }
                 sessionStorage.setItem('mapBeforeBattle', this.currentMapName); // Lưu map hiện tại để quay lại
-                window.location.href = 'battle.html'; 
+
+                // Save coordinates
+                sessionStorage.setItem('battleReturnX', this.player.x);
+                sessionStorage.setItem('battleReturnY', this.player.y);
+
+                window.location.href = 'battle.php';
             } else {
                 this.setGameMessage(`Lỗi bắt đầu trận đấu: ${result.message || 'Dữ liệu không hợp lệ từ server.'}`);
-                this.inBattle = false; 
+                this.inBattle = false;
             }
         } catch (error) {
             console.error("Error initiating battle:", error);
@@ -389,7 +409,7 @@ const game = {
             this.inBattle = false;
         }
     },
-    
+
     // Các hàm showBattleOptions, handleBattleAction, endCurrentBattleOnServer, endCurrentBattle
     // sẽ được chuyển hoàn toàn sang js/battle_ui.js
     // Tuy nhiên, chúng ta cần một hàm để xử lý khi quay lại từ battle.html

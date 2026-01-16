@@ -1,171 +1,272 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-gradient-start: #f3f4f6;
+    --bg-gradient-end: #e5e7eb;
+    --panel-bg: rgba(255, 255, 255, 0.85);
+    --panel-border: rgba(255, 255, 255, 0.5);
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow-sharp: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --glass-blur: 12px;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Font dễ đọc hơn */
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
-    padding: 15px; /* Tăng padding cho body */
-    background-color: #f0f2f5; /* Màu nền nhẹ nhàng cho toàn trang */
+    padding: 20px;
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    color: #333;
+    align-items: center; /* Center content vertically too if screen allows */
+    color: var(--text-main);
+    box-sizing: border-box;
 }
 
 #page-container {
     display: flex;
     flex-direction: row;
-    max-width: 1600px; /* Tăng max-width để có không gian cho 3 cột */
+    max-width: 1400px;
     width: 100%;
-    gap: 20px; /* Khoảng cách rõ ràng hơn giữa các panel */
+    gap: 30px;
+    perspective: 1000px; /* Slight depth */
 }
 
+/* Glassmorphism Panels */
 #left-panel, #center-panel, #right-panel {
-    background-color: #ffffff;
-    padding: 20px;
-    border: 1px solid #d1d1d1;
-    border-radius: 10px; /* Bo góc nhiều hơn */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Box shadow nhẹ nhàng */
+    background: var(--panel-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--panel-border);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#left-panel:hover, #right-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 #left-panel {
-    width: 280px; 
+    width: 300px;
     flex-shrink: 0;
     display: flex;
-    flex-direction: column; /* Sắp xếp các phần tử con theo chiều dọc */
+    flex-direction: column;
 }
 
 #center-panel {
-    flex-grow: 1; 
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 10; /* Center stage */
 }
 
 #right-panel {
-    width: 300px;
+    width: 320px;
     flex-shrink: 0;
 }
 
-#left-panel h2, #right-panel h2, #center-panel h2 /* Style chung cho tiêu đề panel */ {
+/* Headers */
+h2 {
     margin-top: 0;
-    color: #0056b3; /* Màu xanh đậm hơn */
-    border-bottom: 2px solid #0056b3;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 1.3em;
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.5rem;
+    border-bottom: 2px solid rgba(79, 70, 229, 0.1);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    letter-spacing: -0.025em;
 }
 
-#player-pokemon-info p, #trainer-info p {
-    margin: 10px 0;
-    font-size: 0.95em;
+/* Info Text */
+p {
     line-height: 1.6;
-}
-#player-pokemon-info strong, #trainer-info strong {
-    color: #111; /* Màu chữ đậm hơn cho nhãn */
-    min-width: 80px; /* Đảm bảo các nhãn thẳng hàng */
-    display: inline-block;
-}
-#pkm-image {
-    border: 2px solid #007bff;
-    border-radius: 5px;
-    background-color: #f0f8ff; /* Nền nhẹ cho ảnh */
+    margin: 10px 0;
+    color: #374151;
 }
 
+strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
 
+/* Game Area Container */
 #game-container {
-    position: relative; 
-    border: 3px solid #4A5568; /* Viền đậm hơn, màu xám */
-    overflow: hidden; 
-    margin-bottom: 15px; 
-    background-color: #718096; /* Màu nền cho khu vực map nếu map nhỏ hơn container */
-    border-radius: 5px; /* Bo góc nhẹ cho game container */
+    position: relative;
+    border: 4px solid #374151;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-color: #1f2937; /* Dark bg specifically for map */
+    border-radius: 12px;
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+    /* Ensure hardware acceleration for smoother rendering */
+    transform: translateZ(0); 
 }
 
+/* Map Grid */
 #map-grid {
     display: grid;
-    /* border: 1px dashed #a0aec0; */ /* Viền lưới mờ hơn */
 }
 
 .tile {
-    width: 65px;  /* Kích thước mỗi ô - Đồng bộ với game.tileSize */
-    height: 65px; /* Đồng bộ với game.tileSize */
+    width: 65px;
+    height: 65px;
     background-size: cover;
     background-repeat: no-repeat;
-    /* Thêm hiệu ứng khi hover lên tile nếu muốn */
-    /* transition: transform 0.1s ease-in-out; */
+    /* transition: filter 0.2s; */
 }
 /* .tile:hover {
-    transform: scale(1.1);
-    z-index: 1;
+    filter: brightness(1.1);
 } */
 
-
+/* Actors (Player/Boss) */
 #player {
-    position: absolute; 
-    width: 65px; /* Đồng bộ với game.tileSize */
-    height: 65px; /* Đồng bộ với game.tileSize */
-    background-image: url('../assets/images/player/haha.png'); 
+    position: absolute;
+    width: 65px;
+    height: 65px;
     background-size: contain;
     background-repeat: no-repeat;
-    transition: top 0.08s linear, left 0.08s linear; /* Di chuyển nhanh hơn chút */
-    z-index: 10;
-    image-rendering: pixelated; /* Giữ độ nét cho ảnh pixel art */
+    transition: top 0.15s cubic-bezier(0.4, 0, 0.2, 1), left 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+    image-rendering: pixelated; /* Crisp pixel art */
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,0.3)); /* Shadow for player */
 }
 
 .boss-sprite {
     position: absolute;
-    width: 100px; /* Đồng bộ với game.tileSize */
-    height: 100px; /* Đồng bộ với game.tileSize */
-    background-size: contain; /* Hoặc cover tùy kích thước ảnh boss */
+    width: 100px;
+    height: 100px;
+    background-size: contain;
     background-repeat: no-repeat;
-    z-index: 10; 
+    z-index: 15;
     image-rendering: pixelated;
+    transition: transform 0.2s ease-in-out;
+    animation: floatBoss 3s ease-in-out infinite;
 }
 
+@keyframes floatBoss {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0); }
+}
+
+/* UI Info Box (Map coordinates etc) */
 #ui-info {
-    padding: 10px 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    text-align: center; 
-    width: 100%; 
-    box-sizing: border-box; 
-    background-color: #f7fafc; /* Nền sáng hơn cho UI info */
-    margin-bottom: 15px;
+    padding: 15px 20px;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.5);
+    margin-bottom: 20px;
+    backdrop-filter: blur(5px);
 }
+
 #ui-info p {
-    margin: 8px 0;
-    font-size: 0.9em;
+    margin: 5px 0;
+    font-size: 0.95rem;
+    color: #4b5563;
 }
+
 #ui-info span {
-    font-weight: bold;
-    color: #2c5282; /* Màu chữ cho giá trị */
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
-
-#map-controls button, .profile-link-button {
-    background-color: #4A5568; /* Màu xám đậm */
+/* Controls & Buttons */
+button, .profile-link-button {
+    background: var(--primary-color);
     color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 0.9em;
-    margin: 5px 3px;
-    transition: background-color 0.2s;
-}
-#map-controls button:hover, .profile-link-button:hover {
-    background-color: #2D3748; /* Xám đậm hơn khi hover */
-}
-.profile-link-button { /* Style cho link giống button */
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 5px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
     text-decoration: none;
     display: inline-block;
 }
 
+button:hover, .profile-link-button:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(79, 70, 229, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Images */
+#pkm-image {
+    background: white;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sharp);
+    border: 1px solid #e5e7eb;
+    object-fit: contain;
+    transition: transform 0.3s;
+}
+#pkm-image:hover {
+    transform: scale(1.05) rotate(2deg);
+}
+
+#logo-main {
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+    margin-bottom: 20px;
+}
+
+/* Manual/Guide List */
 #manual-text ul {
-    padding-left: 20px;
-    list-style-type: "👉 "; /* Emoji làm bullet point */
+    padding-left: 15px;
+    list-style: none;
 }
 #manual-text li {
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 25px;
 }
-#manual-text strong {
-    color: #0056b3;
+#manual-text li::before {
+    content: "✨";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.9em;
+}
+
+/* Pokemon Info Specifics */
+#player-pokemon-info p, #trainer-info p {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #e5e7eb;
+    padding-bottom: 5px;
+}
+#player-pokemon-info strong, #trainer-info strong {
+    color: #6b7280;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

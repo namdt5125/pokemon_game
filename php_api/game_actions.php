@@ -41,6 +41,10 @@ elseif ($action === 'get_current_battle_data') {
     $valid_enemy = ($enemy && $enemy instanceof Pokemon);
 
     if ($valid_trainer_pokemon && $valid_enemy) {
+        $trainer->pokemon->initSkills();
+        if (method_exists($enemy, 'initSkills')) {
+             $enemy->initSkills();
+        }
         $response = [
             'success' => true,
             'player_pokemon' => $trainer->pokemon,
@@ -143,7 +147,9 @@ elseif ($action === 'fight_action') {
      if (!isset($enemy) || !($enemy instanceof Pokemon)) { $response = ['success' => false, 'message' => 'Không có đối thủ hợp lệ để chiến đấu.']; }
      elseif ($trainer->pokemon->health <= 0) { $response = ['success' => false, 'message' => 'Pokémon của bạn đã kiệt sức!']; }
      elseif ($enemy->health <= 0) { $response = ['success' => false, 'message' => 'Đối thủ đã bị hạ gục.']; }
-     else {
+    else {
+        $skill_index = $_POST['skill_index'] ?? 0;
+        
         $enemy_is_drainer = (isset($enemy->name) && $enemy->name === "Map4_sigmaPika");
         $original_stats_player_display = null; $current_response_extras = [];
         if ($enemy_is_drainer && !isset($_SESSION['drainer_effect_applied_this_battle'])) {
@@ -152,19 +158,42 @@ elseif ($action === 'fight_action') {
             $_SESSION['drainer_effect_applied_this_battle'] = true;
             $current_response_extras['special_effect_applied_log'] = "Kỹ năng đặc biệt của Charizard Hắc Ám: Chỉ số Pokémon của bạn bị hút cạn!";
         }
-        $fight_log = $trainer->fight($enemy); 
+
+        $turn_result = $trainer->fightTurn($enemy, $skill_index); 
         $_SESSION['enemy'] = $enemy; 
-        $outcome_message = ""; $battle_over = false;
+        
+        $outcome_message = ""; $battle_over = $turn_result['is_over'];
         $enemy_name_display = $enemy->name_display ?? $enemy->name;
-        if ($trainer->pokemon->health <= 0) { $outcome_message = "THUA CUỘC: Pokémon của bạn đã bị {$enemy_name_display} đánh bại!"; if ($enemy_is_drainer) $outcome_message = "THUA CUỘC: Dù bị suy yếu, Pokémon của bạn đã chiến đấu dũng cảm nhưng không qua khỏi trước {$enemy_name_display}!"; $battle_over = true; }
-        elseif ($enemy->health <= 0) { $outcome_message = "CHIẾN THẮNG! {$enemy_name_display} bị hạ gục. Pokémon của bạn đã lên cấp và hồi máu."; if ($enemy_is_drainer) $outcome_message = "CHIẾN THẮNG KINH NGẠC: Bất chấp bị hút cạn năng lượng, bạn đã đánh bại {$enemy_name_display}!"; $battle_over = true; }
+
+        if ($battle_over) {
+            if ($turn_result['winner'] === 'enemy') {
+                 $outcome_message = "THUA CUỘC: Pokémon của bạn đã bị {$enemy_name_display} đánh bại!"; 
+                 if ($enemy_is_drainer) $outcome_message = "THUA CUỘC: Dù bị suy yếu, Pokémon của bạn đã chiến đấu dũng cảm nhưng không qua khỏi trước {$enemy_name_display}!";
+            } else {
+                 $outcome_message = "CHIẾN THẮNG! {$enemy_name_display} bị hạ gục. Pokémon của bạn đã lên cấp và hồi máu."; 
+                 if ($enemy_is_drainer) $outcome_message = "CHIẾN THẮNG KINH NGẠC: Bất chấp bị hút cạn năng lượng, bạn đã đánh bại {$enemy_name_display}!";
+                 
+                 // Track defeated boss
+                 if (isset($enemy->is_boss) && $enemy->is_boss) {
+                     if (!isset($trainer->defeated_bosses)) {
+                         $trainer->defeated_bosses = [];
+                     }
+                     if (!in_array($enemy_name_display, $trainer->defeated_bosses)) {
+                         $trainer->defeated_bosses[] = $enemy_name_display;
+                     }
+                 }
+            }
+        }
+        
         if ($battle_over && isset($_SESSION['drainer_effect_applied_this_battle'])) { unset($_SESSION['drainer_effect_applied_this_battle']);  }
+        
         $response = array_merge($current_response_extras, [
             'success' => true, 'type' => 'fight_result',
-            'fight_log' => $fight_log,
+            'fight_log' => $turn_result['log'],
             'player_pokemon_after_fight' => $trainer->pokemon,
             'enemy_pokemon_after_fight' => $enemy, 
-            'outcome_message' => $outcome_message, 'battle_over' => $battle_over
+            'outcome_message' => $outcome_message, 
+            'battle_over' => $battle_over
         ]);
         if ($original_stats_player_display) { $response['original_stats_player_if_drained'] = $original_stats_player_display; }
     }

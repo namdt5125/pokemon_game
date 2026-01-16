@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION["username"])) {
+    header("Location: login.php");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -31,9 +38,14 @@
             </div>
         </div>
 
-        <div id="battle-actions">
-            <button id="fight-button">Fight</button>
-            <button id="run-button">Run</button>
+        <div id="battle-actions" style="flex-direction: column; height: auto;">
+            <div id="skill-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; width: 100%;">
+                <button class="skill-btn" id="skill-0">Skill 1</button>
+                <button class="skill-btn" id="skill-1">Skill 2</button>
+                <button class="skill-btn" id="skill-2">Skill 3</button>
+                <button class="skill-btn" id="skill-3">Skill 4</button>
+            </div>
+            <button id="run-button" style="width: 100%;">Run</button>
         </div>
 
         <div id="battle-log-container">

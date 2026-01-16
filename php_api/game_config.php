@@ -7,5 +7,6 @@ class GlobalConfig {
     const DMG_INCREASE = 15;
     const HEALTH_INCREASE = 60;     
     const RUN_CHANCE = 30;
+    const MAX_VAL = 9999999999;
 }
 ?>

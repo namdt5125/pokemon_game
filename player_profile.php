@@ -161,6 +161,19 @@ if (isset($_GET['save_status'])) {
             <?php endif; ?>
         </div>
 
+        <div class="info-section">
+            <h2>Boss Đã Đánh Bại</h2>
+            <?php if (!empty($trainer->defeated_bosses)): ?>
+                <ul>
+                    <?php foreach ($trainer->defeated_bosses as $boss): ?>
+                        <li><?php echo htmlspecialchars($boss); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <p>Chưa đánh bại boss nào.</p>
+            <?php endif; ?>
+        </div>
+
         <div class="info-section actions">
             <h2>Hành Động</h2>
             <?php if ($trainer && $trainer instanceof Trainer && isset($trainer->pokemon) && $trainer->pokemon instanceof Pokemon): ?>
