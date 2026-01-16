@@ -1,6 +1,6 @@
 <?php
 
-include_once(__DIR__ . "/php_api/GameConfig.php");
+include_once(__DIR__ . "/php_api/game_config.php");
 include_once(__DIR__ . "/php_api/Pokemon.php");
 include_once(__DIR__ . "/php_api/Trainer.php");
 
